@@ -67,6 +67,7 @@ class Actor(nn.Module):
             nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, 2 * action_shape[0])
         )
+        self.test_layer = nn.Linear(self.obs_dim,self.obs_dim)
 
         self.outputs = dict()
         self.apply(weight_init)
@@ -85,6 +86,10 @@ class Actor(nn.Module):
             obs = torch.reshape(obs,(-1,obs.shape[0]))
         #print("actor forward obs shape: ", obs.shape, ": ", image_obs.shape)
         encode_obs = self.encoder(image_obs, detach=detach_encoder)
+
+        #need mapping of encoding observation due to function mismatch
+        obs = torth.sigmoid(self.test_layer(obs))
+        #obs = torch.tanh(obs)
 
         #print('shapes of obs after reshape:', obs.shape, ": ", encode_obs.shape)
         combine_obs = torch.cat((obs,encode_obs),axis = -1)
